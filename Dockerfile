@@ -1,16 +1,27 @@
-FROM openjdk:17-jdk-slim
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-COPY .mvn/ .mvn
-COPY mvnw .
+# Copy từng phần để debug dễ hơn
 COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
 
+# Gỡ lỗi nếu thiếu quyền
 RUN chmod +x mvnw
-RUN ./mvnw dependency:go-offline -B
 
+# Cài dependencies trước
+RUN ./mvnw dependency:go-offline -B || cat /app/logs/error.log
+
+# Copy source sau
 COPY src ./src
 
-RUN ./mvnw clean package -DskipTests
+# ⚠️ In log lỗi chi tiết khi build fail
+RUN ./mvnw clean package -DskipTests || (echo "=== Build failed ===" && cat /app/logs/error.log && exit 1)
+
+# Giai đoạn chạy
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.war app.war
 
 EXPOSE 8080
-CMD ["java", "-jar", "target/ClickOrder-0.0.1-SNAPSHOT.war"]
+CMD ["java", "-jar", "app.war"]
