@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 public class DrinkController {
 
@@ -31,8 +33,18 @@ public class DrinkController {
         return "index";
     }
     @GetMapping("/drinks")
-    public String viewDrinksPage(Model model) {
-        model.addAttribute("listDrinks", drinkRepo.findAll());
+    public String viewDrinksPage(@RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) String category,
+                                 Model model) {
+        List<Drink> drinks;
+
+        if ((keyword != null && !keyword.isEmpty()) || (category != null && !category.isEmpty())) {
+            drinks = drinkRepo.findByNameContainingIgnoreCase(keyword != null ? keyword : "");
+        } else {
+            drinks = drinkRepo.findAll();
+        }
+
+        model.addAttribute("listDrinks", drinks);
         return "listDrinks";
     }
     @GetMapping("drinks/{id}")

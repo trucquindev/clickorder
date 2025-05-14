@@ -86,6 +86,29 @@
             background-color: #c62828;
             transform: translateY(-2px);
         }
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filter-container input,
+        .filter-container select {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+
+        .filter-container input:focus,
+        .filter-container select:focus {
+            border-color: #6d4c41;
+        }
+
     </style>
 </head>
 <body>
@@ -98,7 +121,15 @@
     <a href="/admin/users">Người dùng</a>
     <a href="/admin/stats">Thống kê</a>
 </div>
-
+<!-- Thanh tìm kiếm và lọc -->
+<div class="filter-container">
+    <input type="text" id="searchInput" placeholder="Tìm theo tên đăng nhập...">
+    <select id="roleFilter">
+        <option value="">Tất cả vai trò</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+    </select>
+</div>
 <table>
     <tr>
         <th>ID</th>
@@ -119,6 +150,34 @@
         </tr>
     </c:forEach>
 </table>
+<script>
+    const searchInput = document.getElementById("searchInput");
+    const roleFilter = document.getElementById("roleFilter");
+
+    function filterTable() {
+        const filterText = searchInput.value.toLowerCase();
+        const filterRole = roleFilter.value.toLowerCase();
+
+        const rows = document.querySelectorAll("table tbody tr");
+
+        rows.forEach(row => {
+            const username = row.children[1].textContent.toLowerCase();
+            const role = row.children[2].textContent.toLowerCase();
+
+            const matchesText = username.includes(filterText);
+            const matchesRole = filterRole === "" || role === filterRole;
+
+            if (matchesText && matchesRole) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    searchInput.addEventListener("input", filterTable);
+    roleFilter.addEventListener("change", filterTable);
+</script>
 
 </body>
 </html>
