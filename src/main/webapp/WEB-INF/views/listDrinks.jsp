@@ -124,6 +124,10 @@
 
 <div class="menu-section">
     <h3 class="menu-title">Thực Đơn Hôm Nay</h3>
+    <form method="get" action="/drinks" style="text-align: center; margin-bottom: 30px;">
+        <input type="text" name="keyword" placeholder="Tìm đồ uống..." style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+        <button type="submit" style="padding: 10px 15px; border: none; background-color: #ff5722; color: white; border-radius: 5px;">Tìm kiếm</button>
+    </form>
     <div class="drink-grid">
         <c:forEach var="drink" items="${listDrinks}">
             <div class="drink-card">

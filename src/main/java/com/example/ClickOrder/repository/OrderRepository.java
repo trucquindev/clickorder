@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface OrderRepository extends MongoRepository<Order, String> {
     List<Order> findByCustomerName(String customerName);
+    List<Order> findByCustomerNameContainingIgnoreCase(String keyword);
+
 }

@@ -124,6 +124,15 @@
 </div>
 
 <h2>Danh sách đồ uống</h2>
+<!-- Form tìm kiếm -->
+<form method="get" action="/admin/drinks" style="text-align: center; margin-bottom: 20px;">
+    <input type="text" name="keyword" value="${keyword}" placeholder="Tìm theo tên đồ uống"
+           style="padding: 10px; width: 250px; border-radius: 5px; border: 1px solid #ccc;">
+    <button type="submit" style="padding: 10px 20px; background-color: #6d4c41; color: white; border: none; border-radius: 5px;">
+        Tìm kiếm
+    </button>
+</form>
+
 <table>
     <thead>
     <tr>
