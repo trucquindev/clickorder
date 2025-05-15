@@ -134,12 +134,12 @@ public class AdminController {
 
         // Nội dung
         for (Order order : orders) {
-            table.addCell(order.getCustomerName());
-            table.addCell(order.getDrink().getName());
-            table.addCell(String.valueOf(order.getQuantity()));
-            table.addCell(String.format("%.2f", order.getTotal()));
-            table.addCell(order.getStatus());
-            table.addCell(order.getCreatedAt().toString());
+            table.addCell(new PdfPCell(new Phrase(order.getCustomerName(), headFont)));
+            table.addCell(new PdfPCell(new Phrase(order.getDrink().getName(), headFont)));
+            table.addCell(new PdfPCell(new Phrase(String.valueOf(order.getQuantity()), headFont)));
+            table.addCell(new PdfPCell(new Phrase(String.format("%.2f", order.getTotal()), headFont)));
+            table.addCell(new PdfPCell(new Phrase(order.getStatus(), headFont)));
+            table.addCell(new PdfPCell(new Phrase(order.getCreatedAt().toString(), headFont)));
         }
 
         document.add(table);
