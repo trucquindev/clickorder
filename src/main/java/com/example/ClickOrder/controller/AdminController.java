@@ -5,6 +5,7 @@ import com.example.ClickOrder.model.Order;
 import com.example.ClickOrder.repository.DrinkRepository;
 import com.example.ClickOrder.repository.OrderRepository;
 import com.example.ClickOrder.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -94,7 +95,7 @@ public class AdminController {
         return "manageOrders";
     }
     @GetMapping("/orders/export")
-    public void exportOrdersToPDF(HttpServletResponse response) throws Exception {
+    public void exportOrdersToPDF(HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<Order> orders = orderRepo.findAll();
 
         response.setContentType("application/pdf");
@@ -105,8 +106,11 @@ public class AdminController {
         document.open();
 
         // Tiêu đề
-        Font titleFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 18, BaseColor.DARK_GRAY);
-        Paragraph title = new Paragraph("ORDER LIST", titleFont);
+        String fontPath = request.getServletContext().getRealPath("/WEB-INF/fonts/ARIAL.TTF");
+        BaseFont baseFont = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font = new Font(baseFont, 12);
+        Font titleFont = new Font(baseFont, 18, Font.BOLD, BaseColor.DARK_GRAY);
+        Paragraph title = new Paragraph("DANH SÁCH ĐƠN HÀNG", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         title.setSpacingAfter(20f);
         document.add(title);
@@ -116,10 +120,10 @@ public class AdminController {
         table.setWidthPercentage(100);
         table.setWidths(new int[]{2, 3, 3, 2, 2, 3});
 
-        Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+        Font headFont = new Font(baseFont, 13, Font.BOLD, BaseColor.DARK_GRAY);
 
         // Header
-        Stream.of("Guest name", "Product", "Quanlity", "Total", "Status", "Time")
+        Stream.of("Tên khách hàng", "Sản phẩm", "Số lượng", "Tổng tiền", "Trạng thái", "Thời gian")
                 .forEach(column -> {
                     PdfPCell header = new PdfPCell();
                     header.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -208,7 +212,7 @@ public class AdminController {
         return "stats";
     }
     @GetMapping("/stats/export")
-    public void exportStatsToPDF(HttpServletResponse response) throws Exception {
+    public void exportStatsToPDF(HttpServletRequest request ,HttpServletResponse response) throws Exception {
         List<Order> orders = orderRepo.findAll();
 
         // Tổng doanh thu
@@ -252,38 +256,40 @@ public class AdminController {
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
         document.open();
+        String fontPath = request.getServletContext().getRealPath("/WEB-INF/fonts/ARIAL.TTF");
+        BaseFont baseFont = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font = new Font(baseFont, 12);
+        Font titleFont = new Font(baseFont, 18, Font.BOLD, BaseColor.DARK_GRAY);
+        Font normalFont = new Font(baseFont, 18, Font.NORMAL, BaseColor.BLACK);
 
-        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 12);
-
-        document.add(new Paragraph("SYSTEM STATISTICS", titleFont));
-        document.add(new Paragraph("Creation date: " + new Date(), normalFont));
+        document.add(new Paragraph("THỐNG KÊ HỆ THỐNG", titleFont));
+        document.add(new Paragraph("Ngày tạo: " + new Date(), normalFont));
         document.add(new Paragraph(" ")); // dòng trắng
 
         // Tổng quan
-        document.add(new Paragraph("Total revenue: $" + totalRevenue, normalFont));
-        document.add(new Paragraph("Total order: " + totalOrders, normalFont));
-        document.add(new Paragraph("Total users: " + totalUsers, normalFont));
+            document.add(new Paragraph("Tổng tiền: $" + totalRevenue, normalFont));
+        document.add(new Paragraph("Tổng đơn hàng: " + totalOrders, normalFont));
+        document.add(new Paragraph("Tổng người dùng: " + totalUsers, normalFont));
         document.add(new Paragraph(" "));
 
         // Trạng thái
-        document.add(new Paragraph("Order by status:", normalFont));
+        document.add(new Paragraph("Trạng thái đơn hàng:", normalFont));
         for (Map.Entry<String, Long> entry : orderStatusCounts.entrySet()) {
             document.add(new Paragraph("- " + entry.getKey() + ": " + entry.getValue(), normalFont));
         }
         document.add(new Paragraph(" "));
 
         // Top người dùng
-        document.add(new Paragraph("Top users:", normalFont));
+        document.add(new Paragraph("Xếp hạng người dùng:", normalFont));
         for (Map user : topUsers) {
-            document.add(new Paragraph("- " + user.get("_id") + " | Order: " + user.get("orderCount") + " | Spend: $" + user.get("totalSpent"), normalFont));
+            document.add(new Paragraph("- " + user.get("_id") + " | Đơn hàng: " + user.get("orderCount") + " | Tiền: $" + user.get("totalSpent"), normalFont));
         }
         document.add(new Paragraph(" "));
 
         // Doanh thu theo tháng
-        document.add(new Paragraph("Monthly Revenue:", normalFont));
+        document.add(new Paragraph("Doanh thu hàng tháng:", normalFont));
         for (int i = 0; i < 12; i++) {
-            document.add(new Paragraph("Month " + (i + 1) + ": $" + String.format("%.2f", monthlyRevenue[i]), normalFont));
+            document.add(new Paragraph("Tháng " + (i + 1) + ": $" + String.format("%.2f", monthlyRevenue[i]), normalFont));
         }
 
         document.close();
